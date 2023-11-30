@@ -14,12 +14,12 @@ const MyEditor = () => {
     return EditorState.createEmpty();
   });
 
-  useEffect(() => {
-    // Save data to local storage whenever editor state changes
+  const onSaveButton = () => {
     const contentState = editorState.getCurrentContent();
     const rawContentState = convertToRaw(contentState);
     localStorage.setItem("editorData", JSON.stringify(rawContentState));
-  }, [editorState]);
+    alert("Saved!");
+  };
 
   const handleBeforeInput = (char, editorState) => {
     // Check for # or * as the first character in a line
@@ -29,12 +29,20 @@ const MyEditor = () => {
       .getBlockForKey(selection.getStartKey());
     const text = block.getText();
 
-    if (text === "" && (char === "#" && " ") || (char === "*")) {
+    if (text === "" && char === "#") {
       // Handle # for Heading 1 and * for bold
       const newEditorState =
         char === "#"
           ? RichUtils.toggleBlockType(editorState, "header-one")
           : RichUtils.toggleInlineStyle(editorState, "BOLD");
+
+      setEditorState(newEditorState);
+      return "handled";
+    } else if (text === "" && char === "*") {
+      const newEditorState =
+        char === "*"
+          ? RichUtils.toggleInlineStyle(editorState, "BOLD")
+          : RichUtils.toggleBlockType(editorState, "header-one");
 
       setEditorState(newEditorState);
       return "handled";
@@ -95,7 +103,7 @@ const MyEditor = () => {
             width: "10rem",
             height: "2.5rem",
             borderRadius: "5px",
-            cursor:"pointer"
+            cursor: "pointer",
           }}
           onClick={handleUnderlineClick}
         >
@@ -110,7 +118,7 @@ const MyEditor = () => {
             width: "10rem",
             height: "2.5rem",
             borderRadius: "5px",
-            cursor:"pointer"
+            cursor: "pointer",
           }}
           onClick={handleRedUnderlineClick}
         >
@@ -118,6 +126,7 @@ const MyEditor = () => {
         </button>
 
         <button
+          onClick={onSaveButton}
           style={{
             outline: "none",
             backgroundColor: "blue",
@@ -126,48 +135,45 @@ const MyEditor = () => {
             width: "10rem",
             height: "2.5rem",
             borderRadius: "5px",
-            cursor:"pointer"
+            cursor: "pointer",
           }}
         >
           Save Text
         </button>
       </div>
-      <div style={{marginLeft:"1rem",marginRight:"1rem"}}>
-
-      <Editor
-        editorState={editorState}
-        onEditorStateChange={setEditorState}
-        handleBeforeInput={handleBeforeInput}
-        handleReturn={handleReturn}
-        toolbar={{
-          options: [
-            "inline",
-            "blockType",
-            "list",
-            "textAlign",
-            "colorPicker",
-            "link",
-            "emoji",
-            "remove",
-            "history",
-          ],
-          inline: {
-            options: ["bold", "italic", "strikethrough"],
-            bold: { icon: "bold", className: "custom-option-class" },
-            italic: { icon: "italic", className: "custom-option-class" },
-            strikethrough: {
-              icon: "strikethrough",
-              className: "custom-option-class",
+      <div style={{ marginLeft: "1rem", marginRight: "1rem" }}>
+        <Editor
+          editorState={editorState}
+          onEditorStateChange={setEditorState}
+          handleBeforeInput={handleBeforeInput}
+          handleReturn={handleReturn}
+          toolbar={{
+            options: [
+              "inline",
+              "blockType",
+              "list",
+              "textAlign",
+              "colorPicker",
+              "link",
+              "emoji",
+              "remove",
+              "history",
+            ],
+            inline: {
+              options: ["bold", "italic", "strikethrough"],
+              bold: { icon: "bold", className: "custom-option-class" },
+              italic: { icon: "italic", className: "custom-option-class" },
+              strikethrough: {
+                icon: "strikethrough",
+                className: "custom-option-class",
+              },
             },
-          },
-        }}
-        customStyleMap={customStyleMap}
-      />
+          }}
+          customStyleMap={customStyleMap}
+        />
       </div>
     </div>
   );
 };
 
 export default MyEditor;
-
-// This code implements the code block functionality within the `MyEditor` component itself, eliminating the need for a separate `CodeBlock` component. It uses the `renderBlock` prop of the `Editor` component to customize the rendering of code blocks.
